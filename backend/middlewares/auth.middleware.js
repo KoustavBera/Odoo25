@@ -1,23 +1,30 @@
 import jwt from "jsonwebtoken";
 
+/**
+ * Auth middleware to protect routes using cookie-based JWT.
+ */
 export const isAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: "Authentication required." });
   }
 
-  const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach decoded user to request
+    req.user = decoded; // { email, id, role }
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Invalid/Expired token" });
+    return res.status(403).json({ message: "Invalid or expired token." });
   }
 };
 
+/**
+ * Middleware to allow only admin users.
+ * Assumes isAuth has already run and added req.user.
+ */
 export const isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ message: "Access denied. Admins only." });
   }
   next();

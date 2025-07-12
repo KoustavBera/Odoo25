@@ -3,11 +3,12 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 
 // Cookie options for secure HTTP-only cookie
+// Cookie options
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // send over HTTPS only in production
-  sameSite: "Lax", // adjust based on frontend/backend domains
-  maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
+  secure: true,
+  sameSite: "None",
+  maxAge: 4 * 24 * 60 * 60 * 1000,
 };
 
 // Helper to create token
