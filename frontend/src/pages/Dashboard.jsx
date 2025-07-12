@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import React, { useState, useMemo } from "react";
 import { Search, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
