@@ -1,34 +1,12 @@
-import React from 'react';
-import { Search, Users, CheckCircle } from 'lucide-react';
+import React from "react";
+import { Search, Users, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 export default function StackItHomepage() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <div className="w-2 h-2 bg-black rounded-full mr-2"></div>
-              <span className="text-lg font-semibold text-gray-900">StackIt</span>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-gray-900">Home</a>
-              <a href="#" className="text-gray-700 hover:text-gray-900">About</a>
-              <a href="#" className="text-gray-700 hover:text-gray-900">Contact</a>
-            </nav>
-            <div className="flex space-x-4">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
-                Sign Up
-              </button>
-              <button className="text-gray-700 hover:text-gray-900 text-sm">
-                Log In
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-400 via-teal-500 to-green-600 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,7 +15,7 @@ export default function StackItHomepage() {
             <div className="absolute top-10 left-10 w-16 h-16 bg-orange-400 rounded-full opacity-80"></div>
             <div className="absolute top-32 right-20 w-8 h-8 bg-teal-300 rounded-full opacity-60"></div>
             <div className="absolute bottom-20 left-1/4 w-6 h-6 bg-yellow-400 rounded-full opacity-70"></div>
-            
+
             {/* Laptop illustration */}
             <div className="flex justify-center mb-8">
               <div className="relative">
@@ -65,12 +43,15 @@ export default function StackItHomepage() {
             {/* Hero text */}
             <div className="text-center text-white">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Collaborative Learning, Structured<br />
+                Collaborative Learning, Structured
+                <br />
                 Knowledge
               </h1>
               <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                StackIt is a Personal Q&A forum platform designed to collaborative learning and structured knowledge sharing. Join
-                our community to ask questions, share insights, and learn together.
+                StackIt is a Personal Q&A forum platform designed to
+                collaborative learning and structured knowledge sharing. Join
+                our community to ask questions, share insights, and learn
+                together.
               </p>
               <button className="bg-blue-600 text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-blue-700 transition-colors">
                 Get Started
@@ -88,8 +69,9 @@ export default function StackItHomepage() {
               Why Choose StackIt?
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              StackIt offers a unique approach to Q&A forums, focusing on simplicity and effectiveness.
-              Here's why you'll love using our platform:
+              StackIt offers a unique approach to Q&A forums, focusing on
+              simplicity and effectiveness. Here's why you'll love using our
+              platform:
             </p>
           </div>
 
@@ -103,7 +85,8 @@ export default function StackItHomepage() {
                 Efficient Search
               </h3>
               <p className="text-gray-600">
-                Quickly find answers to your questions with our powerful search functionality.
+                Quickly find answers to your questions with our powerful search
+                functionality.
               </p>
             </div>
 
@@ -116,7 +99,8 @@ export default function StackItHomepage() {
                 Community Collaboration
               </h3>
               <p className="text-gray-600">
-                Connect with a vibrant community of learners and experts to get the best answers.
+                Connect with a vibrant community of learners and experts to get
+                the best answers.
               </p>
             </div>
 
@@ -129,7 +113,8 @@ export default function StackItHomepage() {
                 Verified Answers
               </h3>
               <p className="text-gray-600">
-                Ensure the quality of information with verified answers from trusted members.
+                Ensure the quality of information with verified answers from
+                trusted members.
               </p>
             </div>
           </div>
@@ -143,7 +128,8 @@ export default function StackItHomepage() {
             Ready to Dive In?
           </h2>
           <p className="text-lg text-gray-600 mb-8">
-            Join StackIt today and start your journey of collaborative learning and structured knowledge sharing.
+            Join StackIt today and start your journey of collaborative learning
+            and structured knowledge sharing.
           </p>
           <button className="bg-blue-600 text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-blue-700 transition-colors">
             Explore StackIt
@@ -156,9 +142,15 @@ export default function StackItHomepage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex space-x-8 mb-4 md:mb-0">
-              <a href="#" className="text-gray-600 hover:text-gray-900">Terms of Service</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Privacy Policy</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Contact Us</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Terms of Service
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">
+                Contact Us
+              </a>
             </div>
             <div className="text-gray-500 text-sm">
               © 2023 StackIt. All rights reserved.
