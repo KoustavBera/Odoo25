@@ -77,7 +77,7 @@ const QuestionDetail = () => {
   const handleSubmitAnswer = async () => {
     if (newAnswer.trim()) {
       try {
-        const response = await axios.post(`/questions/${id}/answers`, {
+        const response = await axios.post(`/questions/${id}/answer`, {
           content: newAnswer,
         });
 
@@ -90,20 +90,32 @@ const QuestionDetail = () => {
     }
   };
 
-  const handleVote = async (answerId, direction) => {
+  // Fixed: Separate vote handlers for questions and answers
+  const handleQuestionVote = async (direction) => {
     try {
-      await axios.post(`/answers/${answerId}/vote`, { direction });
-
-      // Update the answer votes locally
-      setAnswers(
-        answers.map((answer) =>
-          answer.id === answerId
-            ? { ...answer, votes: answer.votes + (direction === "up" ? 1 : -1) }
-            : answer
-        )
-      );
+      await axios.patch(`/questions/vote/${id}`, { value: direction });
+      // Refresh question data to get updated vote counts
+      const questionRes = await axios.get(`/questions/${id}`);
+      setQuestion((prev) => ({
+        ...prev,
+        upVotes: questionRes.data.upVote?.length || 0,
+        downVotes: questionRes.data.downVote?.length || 0,
+      }));
     } catch (error) {
-      console.error("Failed to vote", error);
+      console.error("Failed to vote on question", error);
+    }
+  };
+
+  const handleAnswerVote = async (answerId, direction) => {
+    try {
+      await axios.post(`/questions/answers/${answerId}/vote`, {
+        value: direction,
+      });
+      // Refresh answers to get updated vote counts
+      const answersRes = await axios.get(`/questions/${id}/answers`);
+      setAnswers(answersRes.data || []);
+    } catch (error) {
+      console.error("Failed to vote on answer", error);
     }
   };
 
@@ -161,35 +173,71 @@ const QuestionDetail = () => {
 
         {/* Question Card */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight">
-            {question.title}
-          </h1>
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {question.tags.map((tag, index) => (
-              <span
-                key={index}
-                className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium shadow-sm"
+          <div className="flex gap-6">
+            {/* Question Vote buttons */}
+            <div className="flex flex-col items-center gap-3">
+              <button
+                onClick={() => handleQuestionVote("upVote")}
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-green-100 to-green-200 hover:from-green-200 hover:to-green-300 text-green-700 flex items-center justify-center transition-all transform hover:scale-105 shadow-md"
               >
-                {tag}
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" />
+                </svg>
+              </button>
+              <span className="text-xl font-bold text-gray-900 px-2 py-1 bg-gray-100 rounded-lg">
+                {question.upVotes - question.downVotes}
               </span>
-            ))}
-          </div>
-
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            {question.description}
-          </p>
-
-          <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs">
-                {question.username.charAt(0)}
-              </div>
-              <span className="font-medium text-gray-700">
-                {question.username}
-              </span>
+              <button
+                onClick={() => handleQuestionVote("downVote")}
+                className="w-10 h-10 rounded-full bg-gradient-to-r from-red-100 to-red-200 hover:from-red-200 hover:to-red-300 text-red-700 flex items-center justify-center transition-all transform hover:scale-105 shadow-md"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+                </svg>
+              </button>
             </div>
-            <span>{question.timeAgo}</span>
+
+            {/* Question content */}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900 mb-6 leading-tight">
+                {question.title}
+              </h1>
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                {question.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium shadow-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                {question.description}
+              </p>
+
+              <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs">
+                    {question.username.charAt(0)}
+                  </div>
+                  <span className="font-medium text-gray-700">
+                    {question.username}
+                  </span>
+                </div>
+                <span>{question.timeAgo}</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -205,14 +253,16 @@ const QuestionDetail = () => {
           <div className="space-y-6">
             {answers.map((answer) => (
               <div
-                key={answer.id}
+                key={answer._id || answer.id}
                 className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6"
               >
                 <div className="flex gap-6">
-                  {/* Vote buttons */}
+                  {/* Answer Vote buttons */}
                   <div className="flex flex-col items-center gap-3">
                     <button
-                      onClick={() => handleVote(answer.id, "up")}
+                      onClick={() =>
+                        handleAnswerVote(answer._id || answer.id, "upVote")
+                      }
                       className="w-10 h-10 rounded-full bg-gradient-to-r from-green-100 to-green-200 hover:from-green-200 hover:to-green-300 text-green-700 flex items-center justify-center transition-all transform hover:scale-105 shadow-md"
                     >
                       <svg
@@ -224,10 +274,12 @@ const QuestionDetail = () => {
                       </svg>
                     </button>
                     <span className="text-xl font-bold text-gray-900 px-2 py-1 bg-gray-100 rounded-lg">
-                      {answer.votes || 0}
+                      {(answer.upVotes || 0) - (answer.downVotes || 0)}
                     </span>
                     <button
-                      onClick={() => handleVote(answer.id, "down")}
+                      onClick={() =>
+                        handleAnswerVote(answer._id || answer.id, "downVote")
+                      }
                       className="w-10 h-10 rounded-full bg-gradient-to-r from-red-100 to-red-200 hover:from-red-200 hover:to-red-300 text-red-700 flex items-center justify-center transition-all transform hover:scale-105 shadow-md"
                     >
                       <svg
@@ -244,18 +296,24 @@ const QuestionDetail = () => {
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-xl p-4 mb-4">
                       <p className="text-gray-800 whitespace-pre-line leading-relaxed">
-                        {answer.content}
+                        {answer.content || answer.body}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs">
-                        {answer.author?.charAt(0) || "U"}
+                        {(answer.author || answer.userAnswered || "U").charAt(
+                          0
+                        )}
                       </div>
                       <span className="font-medium text-gray-700">
-                        {answer.author || "Anonymous"}
+                        {answer.author || answer.userAnswered || "Anonymous"}
                       </span>
                       <span>•</span>
-                      <span>{answer.timeAgo || "Recently"}</span>
+                      <span>
+                        {answer.timeAgo ||
+                          formatTimeAgo(answer.answeredOn) ||
+                          "Recently"}
+                      </span>
                     </div>
                   </div>
                 </div>
