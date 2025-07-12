@@ -1,6 +1,6 @@
 // components/Navbar.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -25,22 +25,25 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center" onClick={() => navigate("/")}>
             <div className="w-2 h-2 bg-black rounded-full mr-2"></div>
             <span className="text-lg font-semibold text-gray-900">StackIt</span>
           </div>
 
           {/* Navigation Links */}
           <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-700 hover:text-gray-900">
+            <Link
+              to={"/dashboard"}
+              className="text-gray-700 hover:text-gray-900"
+            >
               Home
-            </a>
-            <a href="#" className="text-gray-700 hover:text-gray-900">
+            </Link>
+            <Link href="#" className="text-gray-700 hover:text-gray-900">
               About
-            </a>
-            <a href="#" className="text-gray-700 hover:text-gray-900">
+            </Link>
+            <Link href="#" className="text-gray-700 hover:text-gray-900">
               Contact
-            </a>
+            </Link>
           </nav>
 
           {/* Auth Buttons */}

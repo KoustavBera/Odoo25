@@ -3,13 +3,18 @@ import Question from "../models/question.model.js";
 
 // 🟢 Ask a question
 export const AskQuestion = async (req, res) => {
-  const postQuestionData = req.body;
-  const userId = req.user.id; // ✅ use req.user.id from isAuth
+  const { questionTitle, description, questionTags } = req.body;
 
-  const postQuestion = new Question({ ...postQuestionData, userId });
+  const newQuestion = new Question({
+    questionTitle,
+    description,
+    questionTags,
+    userId: req.user.id, // ObjectId
+    userPosted: req.user.name, // Username
+  });
 
   try {
-    await postQuestion.save();
+    await newQuestion.save();
     res.status(200).json("Posted a question successfully");
   } catch (error) {
     console.log(error);

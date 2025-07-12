@@ -1,19 +1,75 @@
-import React, { useState, useRef } from 'react';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Smile, Link, Image, AlignLeft, AlignCenter, AlignRight, Send, Tag, FileText, Hash } from 'lucide-react';
+import React, { useState, useRef } from "react";
+import {
+  Bold,
+  Italic,
+  Strikethrough,
+  List,
+  ListOrdered,
+  Smile,
+  Link,
+  Image,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Send,
+  Tag,
+  FileText,
+  Hash,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function StackOverflowForm() {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+export default function AddQuestion() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [tags, setTags] = useState([]);
-  const [currentTag, setCurrentTag] = useState('');
+  const [currentTag, setCurrentTag] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
-  const [linkUrl, setLinkUrl] = useState('');
-  const [linkText, setLinkText] = useState('');
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
   const editorRef = useRef(null);
-
-  const popularTags = ['react', 'javascript', 'html', 'css', 'node.js', 'python', 'java', 'typescript', 'angular', 'vue.js', 'php', 'mysql', 'mongodb', 'express', 'tailwind'];
-  const emojis = ['😀', '😃', '😄', '😁', '🤔', '💡', '🔥', '💯', '👍', '👎', '❤️', '⚡', '🚀', '🎯', '✨', '🎉', '🔧', '🐛', '💻', '📱'];
+  const navigate = useNavigate();
+  const popularTags = [
+    "react",
+    "javascript",
+    "html",
+    "css",
+    "node.js",
+    "python",
+    "java",
+    "typescript",
+    "angular",
+    "vue.js",
+    "php",
+    "mysql",
+    "mongodb",
+    "express",
+    "tailwind",
+  ];
+  const emojis = [
+    "😀",
+    "😃",
+    "😄",
+    "😁",
+    "🤔",
+    "💡",
+    "🔥",
+    "💯",
+    "👍",
+    "👎",
+    "❤️",
+    "⚡",
+    "🚀",
+    "🎯",
+    "✨",
+    "🎉",
+    "🔧",
+    "🐛",
+    "💻",
+    "📱",
+  ];
 
   const execCommand = (command, value = null) => {
     document.execCommand(command, false, value);
@@ -23,33 +79,33 @@ export default function StackOverflowForm() {
   const addTag = (tagName) => {
     if (tagName && !tags.includes(tagName) && tags.length < 5) {
       setTags([...tags, tagName]);
-      setCurrentTag('');
+      setCurrentTag("");
     }
   };
 
   const removeTag = (tagToRemove) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
+    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTag(currentTag);
     }
   };
 
   const insertEmoji = (emoji) => {
-    execCommand('insertText', emoji);
+    execCommand("insertText", emoji);
     setShowEmojiPicker(false);
   };
 
   const insertLink = () => {
     if (linkUrl && linkText) {
-      execCommand('createLink', linkUrl);
-      execCommand('insertText', linkText);
+      execCommand("createLink", linkUrl);
+      execCommand("insertText", linkText);
       setShowLinkDialog(false);
-      setLinkUrl('');
-      setLinkText('');
+      setLinkUrl("");
+      setLinkText("");
     }
   };
 
@@ -58,19 +114,51 @@ export default function StackOverflowForm() {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        execCommand('insertImage', e.target.result);
+        execCommand("insertImage", e.target.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e) => {
-    console.log({
-      title,
-      description: editorRef.current.innerHTML,
-      tags
-    });
-    alert('Question submitted successfully!');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const finalDescription = editorRef.current?.innerHTML || "";
+
+    if (!title.trim() || !finalDescription.trim() || tags.length === 0) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    const payload = {
+      questionTitle: title,
+      description: finalDescription,
+      questionTags: tags,
+    };
+
+    try {
+      await toast.promise(
+        axios.post("/questions/ask", payload, {
+          withCredentials: true,
+        }),
+        {
+          loading: "Posting your question...",
+          success: "Question posted successfully!",
+          error: "Failed to post question",
+        }
+      );
+
+      // ✅ Clear form
+      setTitle("");
+      setDescription("");
+      setTags([]);
+      editorRef.current.innerHTML = "";
+
+      // ✅ Redirect to questions page or home
+      navigate("/dashboard"); // or navigate(`/question/${newQuestion._id}`) if response includes ID
+    } catch (err) {
+      console.error("Error posting question:", err);
+    }
   };
 
   return (
@@ -78,14 +166,14 @@ export default function StackOverflowForm() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-         <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             Ask a Question
           </h1>
           <p className="text-grey">Share your knowledge with the community</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-slate-700/50">
+        <div className="bg-white backdrop-blur-xl rounded-2xl p-8 shadow-xl border border-slate-400">
           {/* Title Section */}
           <div className="mb-8">
             <label className="flex items-center gap-2 text-black font-semibold mb-3">
@@ -97,7 +185,7 @@ export default function StackOverflowForm() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Write a clear, descriptive title for your question..."
-              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-black placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
               required
             />
           </div>
@@ -108,76 +196,76 @@ export default function StackOverflowForm() {
               <Hash className="w-5 h-5 text-purple-400" />
               Description
             </label>
-            
+
             {/* Rich Text Editor Toolbar */}
-            <div className="bg-black border border-slate-600 rounded-t-lg p-3 flex flex-wrap gap-2">
-              <div className="flex items-center gap-1 border-r border-slate-600 pr-2">
+            <div className="bg-white border border-slate-300 rounded-t-lg p-3 flex flex-wrap gap-2">
+              <div className="flex items-center gap-1 border-r border-slate-300 pr-2">
                 <button
                   type="button"
-                  onClick={() => execCommand('bold')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("bold")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Bold"
                 >
                   <Bold className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => execCommand('italic')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("italic")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Italic"
                 >
                   <Italic className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => execCommand('strikeThrough')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("strikeThrough")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Strikethrough"
                 >
                   <Strikethrough className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex items-center gap-1 border-r border-slate-600 pr-2">
+              <div className="flex items-center gap-1 border-r border-slate-300 pr-2">
                 <button
                   type="button"
-                  onClick={() => execCommand('insertOrderedList')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("insertOrderedList")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Numbered List"
                 >
                   <ListOrdered className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => execCommand('insertUnorderedList')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("insertUnorderedList")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Bullet List"
                 >
                   <List className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex items-center gap-1 border-r border-slate-600 pr-2">
+              <div className="flex items-center gap-1 border-r border-slate-300 pr-2">
                 <button
                   type="button"
-                  onClick={() => execCommand('justifyLeft')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("justifyLeft")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Align Left"
                 >
                   <AlignLeft className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => execCommand('justifyCenter')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("justifyCenter")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Align Center"
                 >
                   <AlignCenter className="w-4 h-4" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => execCommand('justifyRight')}
-                  className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                  onClick={() => execCommand("justifyRight")}
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                   title="Align Right"
                 >
                   <AlignRight className="w-4 h-4" />
@@ -189,13 +277,13 @@ export default function StackOverflowForm() {
                   <button
                     type="button"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                    className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                     title="Add Emoji"
                   >
                     <Smile className="w-4 h-4" />
                   </button>
                   {showEmojiPicker && (
-                    <div className="absolute top-full left-0 mt-2 bg-slate-700 border border-slate-600 rounded-lg p-10 grid grid-cols-4 gap-10 z-10">
+                    <div className="absolute top-full left-0 mt-2 bg-slate-700 border border-slate-300 rounded-lg p-10 grid grid-cols-4 gap-10 z-10">
                       {emojis.map((emoji, index) => (
                         <button
                           key={index}
@@ -214,19 +302,19 @@ export default function StackOverflowForm() {
                   <button
                     type="button"
                     onClick={() => setShowLinkDialog(!showLinkDialog)}
-                    className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors"
+                    className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors"
                     title="Add Link"
                   >
                     <Link className="w-4 h-4" />
                   </button>
                   {showLinkDialog && (
-                    <div className="absolute top-full left-0 mt-2 bg-slate-700 border border-slate-600 rounded-lg p-4 w-64 z-10">
+                    <div className="absolute top-full left-0 mt-2 bg-slate-700 border border-slate-300 rounded-lg p-4 w-64 z-10">
                       <input
                         type="url"
                         placeholder="Enter URL"
                         value={linkUrl}
                         onChange={(e) => setLinkUrl(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white placeholder-slate-400 mb-2"
+                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-black placeholder-slate-400 mb-2"
                       />
                       <input
                         type="text"
@@ -246,7 +334,10 @@ export default function StackOverflowForm() {
                   )}
                 </div>
 
-                <label className="p-2 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors cursor-pointer" title="Upload Image">
+                <label
+                  className="p-2 hover:bg-slate-600 rounded text-black hover:text-white transition-colors cursor-pointer"
+                  title="Upload Image"
+                >
                   <Image className="w-4 h-4" />
                   <input
                     type="file"
@@ -262,8 +353,8 @@ export default function StackOverflowForm() {
             <div
               ref={editorRef}
               contentEditable
-              className="w-full min-h-[200px] px-4 py-3 bg-slate-700/50 border border-slate-600 border-t-0 rounded-b-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-              style={{ caretColor: 'white' }}
+              className="w-full min-h-[200px] px-4 py-3 bg-white border border-slate-300 border-t-0 rounded-b-lg text-black focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+              style={{ caretColor: "white" }}
               placeholder="Describe your question in detail..."
               onInput={(e) => setDescription(e.target.innerHTML)}
             />
@@ -275,7 +366,7 @@ export default function StackOverflowForm() {
               <Tag className="w-5 h-5 text-green-400" />
               Tags (up to 5)
             </label>
-            
+
             {/* Current Tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {tags.map((tag, index) => (
@@ -302,7 +393,7 @@ export default function StackOverflowForm() {
               onChange={(e) => setCurrentTag(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Add a tag (press Enter to add)"
-              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
               disabled={tags.length >= 5}
             />
 
@@ -315,7 +406,7 @@ export default function StackOverflowForm() {
                     key={index}
                     type="button"
                     onClick={() => addTag(tag)}
-                    className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white rounded-full text-sm border border-slate-600 transition-colors"
+                    className="px-3 py-1 bg-white hover:bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-black hover:text-white rounded-full text-sm border border-slate-300 transition-colors"
                     disabled={tags.includes(tag) || tags.length >= 5}
                   >
                     {tag}

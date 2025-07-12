@@ -18,6 +18,7 @@ const createToken = (user) => {
       email: user.email,
       id: user._id,
       role: user.role,
+      name: user.name,
     },
     process.env.JWT_SECRET,
     { expiresIn: "4d" }
