@@ -32,6 +32,28 @@ export const getAllQuestion = async (req, res) => {
   }
 };
 
+// 🔍 Get a single question by ID
+export const getQuestionById = async (req, res) => {
+  const { id: _id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(_id)) {
+    return res.status(404).json({ message: "Invalid question ID" });
+  }
+
+  try {
+    const question = await Question.findById(_id);
+
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    res.status(200).json(question);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error while fetching question" });
+  }
+};
+
 // ❌ Delete a question
 export const deleteQuestion = async (req, res) => {
   const { id: _id } = req.params;
