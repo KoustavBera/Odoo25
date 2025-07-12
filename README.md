@@ -1,2 +1,2 @@
 # Odoo25
-SWETANJANA MAITY
+Vidhya Vijay
