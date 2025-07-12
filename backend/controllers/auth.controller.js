@@ -95,3 +95,18 @@ export const logout = (req, res) => {
     .status(200)
     .json({ message: "Logged out successfully." });
 };
+
+export const getUser = async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ message: "User not authentica" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    res.json({ user: user });
+  } catch (err) {
+    res.status(403).json({ message: "User not authorized." });
+  }
+};

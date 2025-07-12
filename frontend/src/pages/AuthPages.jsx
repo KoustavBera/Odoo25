@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, CircleChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AuthPages() {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,7 +13,7 @@ export default function AuthPages() {
     confirmPassword: "",
     name: "",
   });
-
+  const { login, signup } = useAuth();
   const handleInputChange = (e) => {
     setFormData({
       ...formData,
@@ -19,18 +21,41 @@ export default function AuthPages() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (isLogin) {
-      console.log("Login attempt:", {
-        email: formData.email,
-        password: formData.password,
+      // 🔄 Use toast.promise for login
+      await toast.promise(login(formData.email, formData.password), {
+        loading: "Logging in...",
+        success: "Logged in successfully!",
+        error: "Login failed. Please check your credentials.",
       });
+      navigate("/dashboard");
     } else {
-      console.log("Signup attempt:", formData);
+      if (formData.password !== formData.confirmPassword) {
+        return toast.error("Passwords do not match. Please try again.");
+      }
+
+      try {
+        await toast.promise(
+          signup({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          }),
+          {
+            loading: "Creating your account...",
+            success: "Account created! Redirecting...",
+            error: "Signup failed. Please try again.",
+          }
+        );
+        navigate("/dashboard");
+      } catch (err) {
+        // Already handled by toast.promise
+      }
     }
   };
-
   const handleGuestAccess = () => {
     console.log("Continuing as guest");
   };

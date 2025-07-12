@@ -2,8 +2,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+
 export default function Navbar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      logout();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (err) {
+      toast.error("Logout failed");
+      console.error(err);
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm">
@@ -28,14 +43,28 @@ export default function Navbar() {
             </a>
           </nav>
 
-          {/* Buttons */}
-          <div className="flex space-x-4">
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
-              onClick={() => navigate("/auth")}
-            >
-              Log in
-            </button>
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-4">
+            {!user ? (
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+                onClick={() => navigate("/auth")}
+              >
+                Log In
+              </button>
+            ) : (
+              <>
+                <span className="text-sm text-gray-800 font-medium">
+                  {user?.name.split(" ")[0]}
+                </span>
+                <button
+                  className="bg-red-500 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-red-600 transition-colors"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
