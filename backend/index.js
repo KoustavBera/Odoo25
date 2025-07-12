@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes.js";
+import questionRouter from "./routes/question.routes.js";
 dotenv.config();
 const app = express();
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -17,7 +18,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
-
+app.use("/api/questions", questionRouter);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
