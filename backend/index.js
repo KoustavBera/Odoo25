@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-
+import cookieParser from "cookie-parser";
 dotenv.config();
 const app = express();
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -14,6 +14,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 
 const PORT = process.env.PORT || 5000;
 

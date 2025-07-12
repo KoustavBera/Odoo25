@@ -1,14 +1,36 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-
 import User from "../models/user.model.js";
 
+// Cookie options for secure HTTP-only cookie
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // send over HTTPS only in production
+  sameSite: "Lax", // adjust based on frontend/backend domains
+  maxAge: 4 * 24 * 60 * 60 * 1000, // 4 days
+};
+
+// Helper to create token
+const createToken = (user) => {
+  return jwt.sign(
+    {
+      email: user.email,
+      id: user._id,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "4d" }
+  );
+};
+
+// ------------------ SIGNUP ------------------
 export const signUp = async (req, res) => {
   const { name, email, password, role } = req.body;
+
   try {
-    const existinguser = await User.findOne({ email });
-    if (existinguser) {
-      return res.status(404).json({ message: "User already Exist." });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -16,17 +38,59 @@ export const signUp = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role, // Optional: sanitize this if needed
     });
 
-    const token = jwt.sign(
-      {
-        email: newUser.email,
-        id: newUser._id,
-        role: newUser.role,
-      },
-      process.env.JWT_SECRET
-    );
+    const token = createToken(newUser);
+
+    // Send token as cookie + response
+    res
+      .cookie("token", token, cookieOptions)
+      .status(201)
+      .json({ result: newUser });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// ------------------ LOGIN ------------------
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return res.status(404).json({ message: "Invalid email or password." });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid email or password." });
+    }
+
+    const token = createToken(existingUser);
+
+    res
+      .cookie("token", token, cookieOptions)
+      .status(200)
+      .json({ result: existingUser });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Something went wrong..." });
+  }
+};
+
+// ------------------ LOGOUT (Optional) ------------------
+export const logout = (req, res) => {
+  res
+    .clearCookie("token", {
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+    })
+    .status(200)
+    .json({ message: "Logged out successfully." });
 };
