@@ -6,8 +6,11 @@ import Navbar from "../components/Navbar.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import AddQuestion from "./pages/AddQuestion.jsx";
 import QuestionDetail from "./pages/QuestionDetail.jsx"; // Add this import
+import { useAuth } from "../context/AuthContext.jsx";
+import AIChatbot from "../components/AIChatbot.jsx";
 
 function App() {
+  const { user } = useAuth();
   return (
     <>
       <Navbar />
@@ -19,6 +22,7 @@ function App() {
         {/* Add this new route for individual questions */}
         <Route path="/questions/:id" element={<QuestionDetail />} />
       </Routes>
+      {user && <AIChatbot />}
     </>
   );
 }
