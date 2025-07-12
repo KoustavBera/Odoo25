@@ -645,4 +645,3 @@ The CONCAT Function.`,
 };
 
 export default Dashboard;
->>>>>>> de3ee47849b9e65a328fd99b53372f11d829aba7
