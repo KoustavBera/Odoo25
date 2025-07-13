@@ -2,19 +2,22 @@ import mongoose from "mongoose";
 
 const QuestionSchema = mongoose.Schema({
   questionTitle: { type: String, required: "Question must have a title" },
-  questionBody: { type: String, required: "Question must have a body" },
-  questionTags: { type: [String], required: "Question must have a tags" },
+  description: { type: String, required: "Question must have a description" },
+  questionTags: { type: [String] },
   noOfAnswers: { type: Number, default: 0 },
   upVote: { type: [String], default: [] },
   downVote: { type: [String], default: [] },
-  userPosted: { type: String, required: "Question must have an author" },
-  userId: { type: String },
+
+  // ✅ Correct user reference
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userPosted: { type: String, required: "Username is required" },
+
   askedOn: { type: Date, default: Date.now },
   answer: [
     {
       answerBody: String,
       userAnswered: String,
-      userId: String,
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       answeredOn: { type: Date, default: Date.now },
     },
   ],
